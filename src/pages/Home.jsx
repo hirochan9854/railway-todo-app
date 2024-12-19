@@ -63,6 +63,7 @@ export const Home = () => {
         setErrorMessage(`タスクの取得に失敗しました。${err}`);
       });
   };
+
   return (
     <div>
       <Header />
@@ -82,7 +83,7 @@ export const Home = () => {
               </p>
             </div>
           </div>
-          <ul className="list-tab">
+          <ul className="list-tab" role="tablist">
             {lists.map((list, key) => {
               const isActive = list.id === selectListId;
               return (
@@ -90,6 +91,28 @@ export const Home = () => {
                   key={key}
                   className={`list-tab-item ${isActive ? "active" : ""}`}
                   onClick={() => handleSelectList(list.id)}
+                  role="tab"
+                  aria-selected={isActive}
+                  tabIndex={isActive ? 0 : -1}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      handleSelectList(list.id);
+                      e.preventDefault();
+                    } else if (
+                      e.key === "ArrowRight" ||
+                      e.key === "ArrowDown"
+                    ) {
+                      const nextTab = e.target.nextElementSibling;
+                      if (nextTab) {
+                        nextTab.focus();
+                      }
+                    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+                      const prevTab = e.target.previousElementSibling;
+                      if (prevTab) {
+                        prevTab.focus();
+                      }
+                    }
+                  }}
                 >
                   {list.title}
                 </li>
@@ -125,15 +148,27 @@ export const Home = () => {
 // 表示するタスク
 const Tasks = (props) => {
   const { tasks, selectListId, isDoneDisplay } = props;
+
+  const calculateTimeRemaining = (limit) => {
+    const now = new Date().getTime();
+    const limitTime = new Date(limit).getTime();
+    return limitTime - now;
+  };
+
+  const formatTimeRemaining = (time) => {
+    const days = Math.floor(time / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((time % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((time % (1000 * 60 * 60)) / (1000 * 60));
+    return `${days}日 ${hours}時間 ${minutes}分`;
+  };
+
   if (tasks === null) return <></>;
 
-  if (isDoneDisplay == "done") {
+  if (isDoneDisplay === "done") {
     return (
       <ul>
         {tasks
-          .filter((task) => {
-            return task.done === true;
-          })
+          .filter((task) => task.done)
           .map((task, key) => (
             <li key={key} className="task-item">
               <Link
@@ -141,6 +176,8 @@ const Tasks = (props) => {
                 className="task-item-link"
               >
                 {task.title}
+                <br />
+                {task.limit}
                 <br />
                 {task.done ? "完了" : "未完了"}
               </Link>
@@ -153,9 +190,7 @@ const Tasks = (props) => {
   return (
     <ul>
       {tasks
-        .filter((task) => {
-          return task.done === false;
-        })
+        .filter((task) => !task.done)
         .map((task, key) => (
           <li key={key} className="task-item">
             <Link
@@ -164,7 +199,16 @@ const Tasks = (props) => {
             >
               {task.title}
               <br />
+              期限: {new Date(task.limit).getFullYear()}年
+              {new Date(task.limit).getMonth() + 1}月
+              {new Date(task.limit).getDate()}日{" "}
+              {new Date(task.limit).getHours()}:
+              {new Date(task.limit).getMinutes()}
+              <br />
               {task.done ? "完了" : "未完了"}
+              <br />
+              残り時間:{" "}
+              {formatTimeRemaining(calculateTimeRemaining(task.limit))}
             </Link>
           </li>
         ))}

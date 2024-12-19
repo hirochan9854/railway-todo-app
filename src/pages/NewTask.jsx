@@ -22,6 +22,7 @@ export const NewTask = () => {
       title: title,
       detail: detail,
       done: false,
+      limit: `${date}T${time}:00Z`,
     };
 
     axios
@@ -53,6 +54,18 @@ export const NewTask = () => {
         setErrorMessage(`リストの取得に失敗しました。${err}`);
       });
   }, []);
+
+  // 現在の日時を取得
+  const now = new Date();
+  const defaultDate = now.toISOString().split("T")[0]; // yyyy-MM-dd形式
+  const defaultTime = now.toTimeString().split(" ")[0].slice(0, 5); // HH:mm形式
+
+  // 初期値を設定
+  const [date, setDate] = useState(defaultDate);
+  const [time, setTime] = useState(defaultTime);
+
+  const handleDateChange = (e) => setDate(e.target.value);
+  const handleTimeChange = (e) => setTime(e.target.value);
 
   return (
     <div>
@@ -90,6 +103,18 @@ export const NewTask = () => {
             className="new-task-detail"
           />
           <br />
+          <div>
+            <label>期限</label>
+            <br />
+            <label>
+              日付:
+              <input type="date" value={date} onChange={handleDateChange} />
+            </label>
+            <label>
+              時刻:
+              <input type="time" value={time} onChange={handleTimeChange} />
+            </label>
+          </div>
           <button
             type="button"
             className="new-task-button"

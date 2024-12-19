@@ -1,16 +1,39 @@
 @charset "utf-8";
 
+$md: 768px;
+$sm: 320px;
+
+@mixin md {
+  @media (max-width: ($md)) {
+    @content;
+  }
+}
+@mixin sm {
+  @media (max-width: ($sm)) {
+    @content;
+  }
+}
+
 .new-list {
-  width: 1000px;
-  margin: 0 auto;
+  margin: 50px auto;
+  list-style: none;
+  width: 90%;
+  max-width: 1000px;
+  @include md {
+    width: 90%;
+  }
 }
 
 .new-list-form {
   color: #555555;
+  @include md {
+    width: 90%;
+  }
 }
 
 .new-list-title {
-  width: 300px;
+  width: 100%;
+  max-width: 400px;
   margin-bottom: 25px;
 }
 
